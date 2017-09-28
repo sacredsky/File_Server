@@ -1,0 +1,26 @@
+The complete code base for both server and client side includes the following 
+class files: FileClient.class, FileServer.class, FileServerImpl.class, 
+FileInfo.class, FileOp.class. For deployment, it is better to wrap up the 
+needed the class files into jar package. For client side, wrap the following classes:
+
+jar cvf Client.jar FileInfo.class
+jar uvf Client.jar FileOp.class
+jar uvf Client.jar FileServer.class
+jar uvf Client.jar FileClient.class
+jar uvf Client.jar FileServerImpl.class
+
+The server side jar can be created in a similar way. For each jar package, create a manifest 
+file specifying the main class. For client jar, put a single line: Main-Class: FileClient 
+in the manifest file and add the file into the jar package.
+jar cvfm Client.jar manifest Put the corresponding jar files to designated machines. At the 
+server side, bind the server to a registry first.
+
+rmiregistry
+
+Start the server as:
+
+java -jar Server.jar
+
+Start the client with the server address as a argument:
+
+java -jar Client.jar SERVER_IP
