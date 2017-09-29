@@ -26,7 +26,10 @@ public class FileClient
 			System.out.println("Found remote server !");
 			System.out.println("---------------------");
 			System.out.println("Please issue commands.");
-			System.out.println("e.g. get(put) filename.");
+			System.out.println("get filename");
+			System.out.println("put filename");
+			System.out.println("delete filename");
+			System.out.println("rename oldname newname");
 
 			BufferedReader inFromUser = new BufferedReader (new InputStreamReader(System.in));
 			String req = inFromUser.readLine();
@@ -54,6 +57,13 @@ public class FileClient
                                 fileif1.setInfo(filename, content);
                                 fs.PutFile(fileif1);
 				input.close();
+			}
+			if (cmd.equals("rename")){
+				String filename2 = st.nextToken();
+				fs.RenameFile(filename, filename2);
+			}
+			if (cmd.equals("delete")){
+				fs.DeleteFile(filename);
 			}
 		}
 		catch(Exception e) {
