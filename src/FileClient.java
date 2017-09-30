@@ -30,6 +30,8 @@ public class FileClient
 			System.out.println("put filename");
 			System.out.println("delete filename");
 			System.out.println("rename oldname newname");
+			System.out.println("mkdir dirname");
+			System.out.println("rmdir dirname");
 
 			BufferedReader inFromUser = new BufferedReader (new InputStreamReader(System.in));
 			String req = inFromUser.readLine();
@@ -48,7 +50,7 @@ public class FileClient
 				output.flush();
 				output.close();
 			}
-			if (cmd.equals("put")){
+			else if (cmd.equals("put")){
 				File file = new File(filename);
                                 byte[] content = new byte[(int)file.length()];
 				BufferedInputStream input = new BufferedInputStream(new FileInputStream(file.getName()));
@@ -58,12 +60,18 @@ public class FileClient
                                 fs.PutFile(fileif1);
 				input.close();
 			}
-			if (cmd.equals("rename")){
+			else if (cmd.equals("rename")){
 				String filename2 = st.nextToken();
 				fs.RenameFile(filename, filename2);
 			}
-			if (cmd.equals("delete")){
+			else if (cmd.equals("delete")){
 				fs.DeleteFile(filename);
+			}
+			else if (cmd.equals("mkdir")){
+				fs.mkdir(filename);
+			}
+			else if (cmd.equals("rmdir")){
+				fs.rmdir(filename);
 			}
 		}
 		catch(Exception e) {

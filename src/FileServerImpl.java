@@ -6,6 +6,8 @@
 //import java.rmi.registry.*;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -84,6 +86,37 @@ public class FileServerImpl implements FileServer
 		else {
 			System.out.println("Delete "+Filename+" success!");
 		}
+	}
+	
+	public void mkdir(String Filename) throws RemoteException{
+		Path dir = Paths.get(Filename);
+		File files = dir.toFile();
+        if (!files.exists()) {
+            if (files.mkdirs()) {
+                System.out.println("Create directories "+Filename+" success!");
+            } else {
+                System.out.println("Create directories "+Filename+" Error!");
+            }
+        }
+	}
+	
+	public void rmdir(String Filename) throws RemoteException{
+		
+		Path dir = Paths.get(Filename);
+		File file = dir.toFile();
+	    File[] contents = file.listFiles();
+	    if (contents != null) {
+	        for (File f : contents) {
+	        	rmdir(f.getPath());
+	        }
+	    }
+        if (!file.exists()) {
+            if (file.delete()) {
+                System.out.println("Delete "+Filename+" success!");
+            } else {
+                System.out.println("Delete "+Filename+" Error!");
+            }
+        }
 	}
 
 	public static void main(String args[])

@@ -9,4 +9,6 @@ public interface FileServer extends Remote
   public  void PutFile(FileInfo fileif) throws RemoteException;
   public void RenameFile(String Filename, String Filename2) throws RemoteException;
   public void DeleteFile(String Filename) throws RemoteException;
+  public void mkdir(String Filename) throws RemoteException;
+  public void rmdir(String Filename) throws RemoteException;
 }
