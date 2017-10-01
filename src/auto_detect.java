@@ -3,6 +3,8 @@ import java.nio.file.*;
 import static java.nio.file.StandardWatchEventKinds.*;
 import static java.nio.file.LinkOption.*;
 import java.nio.file.attribute.*;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.io.*;
 import java.util.*;
 
@@ -13,6 +15,7 @@ public class auto_detect {
     private final Map<WatchKey,Path> keys;
     private final boolean loop;
     private boolean trace = false;
+    private FileServer fs;
 
     @SuppressWarnings("unchecked")
     static <T> WatchEvent<T> cast(WatchEvent<?> event) {
@@ -47,10 +50,11 @@ public class auto_detect {
         });
     }
 
-    auto_detect(Path dir, boolean loop) throws IOException {
+    auto_detect(Path dir, boolean loop, FileServer fs) throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<WatchKey,Path>();
         this.loop = loop;
+        this.fs=fs;
 
         if (loop) {
             System.out.format("Scanning %s ...\n", dir);
@@ -99,17 +103,34 @@ public class auto_detect {
 
                 // print out event
                 System.out.format("%s: %s Detected! Updating to Server...\n", event.kind().name(), child);
-
-                if (kind == ENTRY_CREATE) {
-    				File file = child.toFile();
-	                byte[] content = new byte[(int)file.length()];
-					BufferedInputStream input = new BufferedInputStream(new FileInputStream(file.getName()));
-					input.read(content);
-					FileInfo fileif1 = new FileOp();
-				    fileif1.setInfo(child.toString(), content);
-				    fs.PutFile(fileif1);
-					input.close();
-                }
+        		try
+        		{
+        			String filename = child.toString();
+	                if (kind == ENTRY_CREATE||kind == ENTRY_MODIFY) {
+	    				File file = new File(filename);
+	    				if(!file.isDirectory())
+	    				{
+		                    byte[] content = new byte[(int)file.length()];
+		    				BufferedInputStream input = new BufferedInputStream(new FileInputStream(file.getName()));
+		    				input.read(content);
+		    				FileInfo fileif1 = new FileOp();
+		                    fileif1.setInfo(filename, content);
+		                    fs.PutFile(fileif1);
+		    				input.close();
+	    				}
+					}
+	                if (kind == ENTRY_DELETE) {
+	                	File file = new File(filename);
+	    				if(!file.isDirectory())
+	    				{
+	    					fs.DeleteFile(filename);
+	    				}
+					}
+        		}
+        		catch(Exception e) {
+        			System.err.println("FileServer exception: "+ e.getMessage());
+        			e.printStackTrace();
+        		}
 
                 if (loop && (kind == ENTRY_CREATE)) {
                     try {
@@ -136,7 +157,7 @@ public class auto_detect {
     }
 
     static void usage() {
-        System.err.println("usage: java auto_detect [-r] dir");
+        System.err.println("usage: java auto_detect dir hostname");
         System.exit(-1);
     }
 
@@ -145,16 +166,25 @@ public class auto_detect {
         if (args.length == 0 || args.length > 2)
             usage();
         boolean loop = false;
-        int dirArg = 0;
-        if (args[0].equals("-r")) {
-            if (args.length < 2)
-                usage();
-            loop = true;
-            dirArg++;
-        }
 
         // register directory and process its events
-        Path dir = Paths.get(args[dirArg]);
-        new auto_detect(dir, loop).processEvents();
+        Path dir = Paths.get(args[0]);
+        
+		try
+		{
+			Registry registry = LocateRegistry.getRegistry(args[1]);
+			String url = "//" + args[0] + "/FILE-SERVER";
+            System.out.println(url);
+			FileServer fs = (FileServer)registry.lookup("FILE-SERVER");
+
+			System.out.println("Found remote server !");
+			System.out.println("---------------------");
+			new auto_detect(dir, loop, fs).processEvents();
+		}
+		catch(Exception e) {
+			System.err.println("FileServer exception: "+ e.getMessage());
+			e.printStackTrace();
+		}
+        
     }
 }
