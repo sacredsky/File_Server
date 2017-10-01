@@ -1,9 +1,6 @@
 /* Implementation of server methods */
 /* by Jia Rao */
 
-//import java.rmi.*;
-//import java.rmi.server.*;
-//import java.rmi.registry.*;
 import java.io.*;
 import java.net.*;
 import java.nio.file.Path;
@@ -17,25 +14,22 @@ import java.rmi.server.UnicastRemoteObject;
 
 public class FileServerImpl implements FileServer
 {
-	//FileServerImpl() throws RemoteException
-	//{
-	//	super();
-	//}
 	public FileServerImpl() {}
-	/**
-	 * You need to implement the following file operations
-         */
 	public FileInfo GetFile(String filename) throws RemoteException{
 		FileInfo fileif1 = new FileOp();
 		try
 		{
 			File file = new File(filename);
-	        byte[] content = new byte[(int)file.length()];
-			BufferedInputStream input = new BufferedInputStream(new FileInputStream(file.getName()));
-			input.read(content);
-	        fileif1.setInfo(filename, content);
-	        input.close();
-	        System.out.println("Sent "+filename+"!");
+			fileif1.setInfo("NoSuchFile", null);
+			if(!file.isDirectory()&&file.exists())
+			{
+		        byte[] content = new byte[(int)file.length()];
+				BufferedInputStream input = new BufferedInputStream(new FileInputStream(file.getName()));
+				input.read(content);
+		        fileif1.setInfo(filename, content);
+		        input.close();
+		        System.out.println("Sent "+filename+"!");
+			}
 	        return fileif1;
 		}
 		catch(Exception e) {

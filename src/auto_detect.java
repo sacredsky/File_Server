@@ -105,13 +105,16 @@ public class auto_detect {
                 System.out.format("%s: %s Detected! Updating to Server...\n", event.kind().name(), child);
         		try
         		{
-        			String filename = child.toString();
+        			//System.out.format("name %s\nchild  %s\n", name, child);
+        			String filename = name.toString();
 	                if (kind == ENTRY_CREATE||kind == ENTRY_MODIFY) {
-	    				File file = new File(filename);
+	                	//String filepath=".\\"+child.toString();
+	                	//System.out.format("filepath %s", filepath);
+	    				File file = child.toFile();
 	    				if(!file.isDirectory())
 	    				{
 		                    byte[] content = new byte[(int)file.length()];
-		    				BufferedInputStream input = new BufferedInputStream(new FileInputStream(file.getName()));
+		    				BufferedInputStream input = new BufferedInputStream(new FileInputStream(file.getPath()));
 		    				input.read(content);
 		    				FileInfo fileif1 = new FileOp();
 		                    fileif1.setInfo(filename, content);
@@ -173,7 +176,7 @@ public class auto_detect {
 		try
 		{
 			Registry registry = LocateRegistry.getRegistry(args[1]);
-			String url = "//" + args[0] + "/FILE-SERVER";
+			String url = "//" + args[1] + "/FILE-SERVER";
             System.out.println(url);
 			FileServer fs = (FileServer)registry.lookup("FILE-SERVER");
 
